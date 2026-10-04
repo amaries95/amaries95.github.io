@@ -69,6 +69,8 @@
 
         *, *::before, *::after { box-sizing: border-box; }
 
+        [hidden] { display: none !important; }
+
         html { -webkit-text-size-adjust: 100%; }
 
         body {
@@ -154,14 +156,7 @@
         }
 
         .name .last {
-            padding: 0 6px;
-            background: linear-gradient(transparent 60%, var(--accent) 60%, var(--accent) 88%, transparent 88%);
-        }
-
-        html[data-theme="dark"] .name .last {
-            background: none;
             color: var(--accent);
-            padding: 0;
         }
 
         .role {
@@ -866,7 +861,7 @@
 </head>
 <body>
     <div class="toolbar" aria-label="Page actions" data-i18n-attrs="aria-label:ui.actions">
-        <button class="tbtn lang" id="langToggle" type="button" aria-label="Switch language" data-i18n-attrs="aria-label:ui.lang">
+        <button class="tbtn lang" id="langToggle" type="button" aria-label="Switch language" data-i18n-attrs="aria-label:ui.lang" hidden>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
             <span class="seg" data-l="en">EN</span><span class="seg" data-l="ro">RO</span>
         </button>
@@ -1197,6 +1192,7 @@
                         <span class="chip-s" data-i18n="w.sports">Sports</span>
                         <span class="chip-s" data-i18n="w.economics">Economics</span>
                         <span class="chip-s" data-i18n="w.business">Business</span>
+                        <span class="chip-s" data-i18n="w.investments">Investments</span>
                         <span class="chip-s" data-i18n="w.iot">IoT</span>
                         <span class="chip-s" data-i18n="w.home-automation">Home Automation</span>
                         <span class="chip-s" data-i18n="w.wellbeing">Wellbeing</span>
@@ -1207,7 +1203,7 @@
         </div>
 
         <section class="projects-wrap">
-            <h2 class="sec-title" data-i18n="sec7"><span class="idx">07</span> Selected projects</h2>
+            <h2 class="sec-title" data-i18n="sec7"><span class="idx">07</span> Projects</h2>
 
             <div class="projects">
                 <article class="project featured">
@@ -1301,7 +1297,7 @@
             "sec4": "<span class=\"idx\">04</span> În afara codului",
             "sec5": "<span class=\"idx\">05</span> Limbi",
             "sec6": "<span class=\"idx\">06</span> Interese",
-            "sec7": "<span class=\"idx\">07</span> Proiecte selectate",
+            "sec7": "<span class=\"idx\">07</span> Proiecte",
             "job1.date": "Oct 2025 – Prezent",
             "job1.company": "Banca Transilvania <span class=\"pill-now\">acum</span>",
             "job1.1": "Dezvolt servicii backend pentru <b>stratul de integrare al BT Pay</b>, între aplicație, sistemele interne ale băncii și integrările cu terți",
@@ -1397,6 +1393,7 @@
             "w.tennis": "Tenis",
             "w.sports": "Sport",
             "w.economics": "Economie",
+            "w.investments": "Investiții",
             "w.home-automation": "Automatizări pentru casă",
             "w.self-help": "Dezvoltare personală",
             "w.migration": "Migrare",
