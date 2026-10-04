@@ -14,12 +14,19 @@
     <meta name="twitter:card" content="summary">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314161b'/%3E%3Ctext x='32' y='43' font-family='Arial,sans-serif' font-size='30' font-weight='700' text-anchor='middle' fill='%23ebc317'%3EAM%3C/text%3E%3C/svg%3E">
     <script>
-        // apply the saved/system theme before first paint to avoid a flash
+        // apply the saved/system theme and the language before first paint to avoid a flash
         (function () {
-            var t = null;
+            var t = null, l = 'en';
             try { t = localStorage.getItem('cv-theme'); } catch (e) {}
             if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', t);
+
+            // English by default; ?lang=ro or a previously chosen language overrides it
+            try {
+                var q = new URLSearchParams(location.search).get('lang');
+                l = q || localStorage.getItem('cv-lang') || 'en';
+            } catch (e) {}
+            document.documentElement.setAttribute('lang', l === 'ro' ? 'ro' : 'en');
         })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -774,6 +781,26 @@
 
         .tbtn svg { width: 16px; height: 16px; }
 
+        .tbtn.lang { gap: 4px; padding: 0 6px 0 12px; }
+        .tbtn.lang svg { margin-right: 4px; }
+
+        .tbtn .seg {
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-family: var(--f-mono);
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.4;
+            color: var(--muted);
+            transition: background-color .2s ease, color .2s ease;
+        }
+
+        html[lang="en"] .tbtn .seg[data-l="en"],
+        html[lang="ro"] .tbtn .seg[data-l="ro"] {
+            background: var(--accent);
+            color: var(--accent-ink);
+        }
+
         .tbtn .sun { display: none; }
         html[data-theme="dark"] .tbtn .sun { display: block; }
         html[data-theme="dark"] .tbtn .moon { display: none; }
@@ -815,6 +842,8 @@
             html:not(.print-measure) .role { font-size: 19px; }
             html:not(.print-measure) .job-head { flex-direction: column; gap: 2px; }
             html:not(.print-measure) .tbtn .label { display: none; }
+            html:not(.print-measure) .tbtn.lang svg { display: none; }
+            html:not(.print-measure) .tbtn.lang { padding-left: 6px; }
         }
 
         /* ---------- print: single long page, sized by the script below ---------- */
@@ -836,15 +865,19 @@
     </style>
 </head>
 <body>
-    <div class="toolbar" aria-label="Page actions">
-        <button class="tbtn" id="themeToggle" type="button" aria-label="Toggle dark mode">
+    <div class="toolbar" aria-label="Page actions" data-i18n-attrs="aria-label:ui.actions">
+        <button class="tbtn lang" id="langToggle" type="button" aria-label="Switch language" data-i18n-attrs="aria-label:ui.lang">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+            <span class="seg" data-l="en">EN</span><span class="seg" data-l="ro">RO</span>
+        </button>
+        <button class="tbtn" id="themeToggle" type="button" aria-label="Toggle dark mode" data-i18n-attrs="aria-label:ui.theme.aria">
             <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
             <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-            <span class="label">Theme</span>
+            <span class="label" data-i18n="ui.theme">Theme</span>
         </button>
         <button class="tbtn" id="printBtn" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
-            <span class="label">Save PDF</span>
+            <span class="label" data-i18n="ui.save">Save PDF</span>
         </button>
     </div>
 
@@ -857,9 +890,9 @@
                     Senior Software Engineer
                     <span class="chip">.NET</span><span class="chip">Azure</span><span class="chip">AI</span>
                 </p>
-                <p class="summary">
+                <p class="summary" data-i18n="summary">
                     I build <b>scalable backend systems</b> and full-stack products with C#, .NET and Azure.
-                    Over <b>8+ years</b> I went from embedded and desktop software to banking and fintech,
+                    Over <b>9+ years</b> I went from embedded and desktop software to banking and fintech,
                     where I own business-critical flows, integrate with internal and third-party systems
                     and support production through on-call. I work <b>AI-first</b>: GitHub Copilot is part of my
                     daily workflow and I build AI agents that automate real business work.
@@ -874,179 +907,175 @@
                         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
                         alexandru.maries@icloud.com
                     </a>
-                    <a class="contact" href="https://alexandrumaries.com" target="_blank" rel="noopener">
-                        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>
-                        alexandrumaries.com
-                    </a>
                     <span class="contact">
                         <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg></span>
-                        Cluj-Napoca, Romania
+                        <span data-i18n="ui.location">Cluj-Napoca, Romania</span>
                     </span>
                 </div>
             </div>
 
             <div class="portrait reveal" style="--d: .15s">
-                <img src="poza.jpg" alt="Portrait of Alex Mărieș">
+                <img src="poza.jpg" alt="Portrait of Alex Mărieș" data-i18n-attrs="alt:ui.photo">
                 <div class="badge"><span>{</span> .NET + AI <span>}</span></div>
             </div>
         </header>
 
-        <section class="now reveal" style="--d: .25s" aria-label="Currently">
-            <div class="now-label">// currently</div>
+        <section class="now reveal" style="--d: .25s" aria-label="Currently" data-i18n-attrs="aria-label:ui.now">
+            <div class="now-label" data-i18n="now.label">// currently</div>
             <div class="now-item">
                 <span class="live" aria-hidden="true"></span>
                 <div>
-                    <strong>Senior Software Developer <em>@</em> Banca Transilvania</strong>
-                    <small>BT Pay integration backend · on-call · mentoring</small>
+                    <strong data-i18n="now1.title">Senior Software Developer <em>@</em> Banca Transilvania</strong>
+                    <small data-i18n="now1.sub">BT Pay integration backend · on-call · mentoring</small>
                 </div>
             </div>
             <div class="now-item">
                 <span class="live" aria-hidden="true"></span>
                 <div>
-                    <strong>Co-founder <em>@</em> Dash Out</strong>
-                    <small>mobile app + AI agent for social media content</small>
+                    <strong data-i18n="now2.title">Technical Lead <em>@</em> Dash Out</strong>
+                    <small data-i18n="now2.sub">co-founder · architecture · mobile + AI agent</small>
                 </div>
             </div>
         </section>
 
-        <section class="stats reveal" style="--d: .3s" aria-label="Highlights">
-            <div class="stat"><b>8<i>+</i></b><span>years building software, from embedded to cloud</span></div>
-            <div class="stat"><b>Fintech</b><span>banking, payments &amp; investment systems</span></div>
-            <div class="stat"><b>AI<i>-</i>first</b><span>Copilot workflows &amp; AI agents in production work</span></div>
-            <div class="stat"><b>Co<i>-</i>founder</b><span>Dash Out, from first commit to launch</span></div>
+        <section class="stats reveal" style="--d: .3s" aria-label="Highlights" data-i18n-attrs="aria-label:ui.stats">
+            <div class="stat"><b>9<i>+</i></b><span data-i18n="stat1">years building software, from embedded to cloud</span></div>
+            <div class="stat"><b>Fintech</b><span data-i18n="stat2">banking, payments &amp; investment systems</span></div>
+            <div class="stat"><b>AI<i>-</i>first</b><span data-i18n="stat3">Copilot workflows &amp; AI agents in production work</span></div>
+            <div class="stat"><b>Tech<i>-</i>lead</b><span data-i18n="stat4">Dash Out: architecture and delivery, end to end</span></div>
         </section>
 
         <div class="body">
             <main>
                 <section>
-                    <h2 class="sec-title"><span class="idx">01</span> Experience</h2>
+                    <h2 class="sec-title" data-i18n="sec1"><span class="idx">01</span> Experience</h2>
 
                     <div class="timeline">
                         <div class="job current">
                             <div class="job-head">
-                                <h3 class="job-role">Senior Software Developer</h3>
-                                <span class="job-date">Oct 2025 – Present</span>
+                                <h3 class="job-role" data-i18n="job1.role">Senior Software Developer</h3>
+                                <span class="job-date" data-i18n="job1.date">Oct 2025 – Present</span>
                             </div>
-                            <div class="job-company">Banca Transilvania <span class="pill-now">now</span></div>
+                            <div class="job-company" data-i18n="job1.company">Banca Transilvania <span class="pill-now">now</span></div>
                             <ul class="points">
-                                <li>Develop backend services for the <b>integration layer between BT Pay</b> and the bank's internal systems and third-party integrations</li>
-                                <li><b>Owner of key business flows</b>, accountable for their reliability and continuous improvement</li>
-                                <li>Investigate and resolve <b>production issues</b> and take part in <b>on-call</b> rotations for fast incident response</li>
-                                <li>Mentor and support junior colleagues in their technical and professional growth</li>
-                                <li>Develop with <b>GitHub Copilot</b> for implementation, refactoring, unit tests and code reviews, and drive the adoption of <b>AI tools and practices</b> in the team's development process</li>
+                                <li data-i18n="job1.1">Develop backend services for the <b>integration layer between BT Pay</b> and the bank's internal systems and third-party integrations</li>
+                                <li data-i18n="job1.2"><b>Owner of key business flows</b>, accountable for their reliability and continuous improvement</li>
+                                <li data-i18n="job1.3">Investigate and resolve <b>production issues</b> and take part in <b>on-call</b> rotations for fast incident response</li>
+                                <li data-i18n="job1.4">Mentor and support junior colleagues in their technical and professional growth</li>
+                                <li data-i18n="job1.5">Develop with <b>GitHub Copilot</b> for implementation, refactoring, unit tests and code reviews, and drive the adoption of <b>AI tools and practices</b> in the team's development process</li>
                             </ul>
                             <div class="tags">
-                                <span class="tag">Backend</span><span class="tag">Integrations</span><span class="tag">Banking</span><span class="tag">On-call</span><span class="tag ai">GitHub Copilot</span>
+                                <span class="tag" data-i18n="w.backend">Backend</span><span class="tag" data-i18n="w.integrations">Integrations</span><span class="tag" data-i18n="w.banking">Banking</span><span class="tag" data-i18n="w.on-call">On-call</span><span class="tag ai" data-i18n="w.github-copilot">GitHub Copilot</span>
                             </div>
                         </div>
 
                         <div class="job current">
                             <div class="job-head">
-                                <h3 class="job-role">Co-founder &amp; Senior Software Engineer</h3>
-                                <span class="job-date">Apr 2024 – Present</span>
+                                <h3 class="job-role" data-i18n="job2.role">Co-founder &amp; Technical Lead</h3>
+                                <span class="job-date" data-i18n="job2.date">Apr 2024 – Present</span>
                             </div>
-                            <div class="job-company">Dash Out <span class="pill-now">now</span></div>
+                            <div class="job-company" data-i18n="job2.company">Dash Out <span class="pill-now">now</span></div>
                             <ul class="points">
-                                <li>Led the product from <b>inception to launch</b>, defining the technical vision and roadmap around business goals</li>
-                                <li>Designed and built a scalable <b>.NET backend on Azure</b> and responsive frontend interfaces</li>
-                                <li>Built an <b>AI agent</b> that processes photos and <b>automatically publishes content on social media</b>, automating the marketing workflow</li>
-                                <li>Use <b>AI-assisted development</b> with GitHub Copilot across the whole lifecycle, from features and refactoring to tests and documentation</li>
-                                <li>Built and led a multidisciplinary team using Scrum, with timely delivery of features</li>
-                                <li>Set up <b>CI/CD pipelines</b> with mandatory automated tests on every pull request, backed by unit, integration and end-to-end testing</li>
+                                <li data-i18n="job2.1"><b>Technical lead of the entire project</b>, from inception to launch, defining the technical vision and roadmap around business goals</li>
+                                <li data-i18n="job2.2">Own the <b>solution architecture</b> and designed a scalable <b>.NET backend on Azure</b>, plus the mobile and web frontend interfaces</li>
+                                <li data-i18n="job2.3">Built an <b>AI agent</b> that processes photos and <b>automatically publishes content on social media</b>, automating the marketing workflow</li>
+                                <li data-i18n="job2.4">Use <b>AI-assisted development</b> with GitHub Copilot across the whole lifecycle, from features and refactoring to tests and documentation</li>
+                                <li data-i18n="job2.5">Built and led a multidisciplinary team using Scrum, with timely delivery of features</li>
+                                <li data-i18n="job2.6">Set up <b>CI/CD pipelines</b> with mandatory automated tests on every pull request, backed by unit, integration and end-to-end testing</li>
                             </ul>
                             <div class="tags">
-                                <span class="tag">.NET</span><span class="tag">Azure</span><span class="tag">Mobile</span><span class="tag">CI/CD</span><span class="tag ai">AI agent</span><span class="tag ai">GitHub Copilot</span>
+                                <span class="tag" data-i18n="w.net">.NET</span><span class="tag" data-i18n="w.azure">Azure</span><span class="tag" data-i18n="w.mobile">Mobile</span><span class="tag" data-i18n="w.ci-cd">CI/CD</span><span class="tag ai" data-i18n="w.ai-agent">AI agent</span><span class="tag ai" data-i18n="w.github-copilot">GitHub Copilot</span>
                             </div>
                         </div>
 
                         <div class="job">
                             <div class="job-head">
-                                <h3 class="job-role">Full Stack .NET Developer</h3>
-                                <span class="job-date">Dec 2022 – Oct 2025</span>
+                                <h3 class="job-role" data-i18n="job3.role">Full Stack .NET Developer</h3>
+                                <span class="job-date" data-i18n="job3.date">Dec 2022 – Oct 2025</span>
                             </div>
-                            <div class="job-company">Centric IT Solutions Romania</div>
+                            <div class="job-company" data-i18n="job3.company">Centric IT Solutions Romania</div>
                             <ul class="points">
-                                <li>Developed full-stack features with <b>.NET 8</b> on the backend and <b>Ext JS</b> on the frontend</li>
-                                <li>Refactored services to align with current principles and design patterns</li>
-                                <li>Defined project scope, estimated timelines and planned tasks</li>
-                                <li>Analyzed, fixed and tested software bugs, with unit and integration testing</li>
-                                <li>Mentored less experienced colleagues, while growing as a mentee in the company's mentorship program and internal training school</li>
+                                <li data-i18n="job3.1">Developed full-stack features with <b>.NET 8</b> on the backend and <b>Ext JS</b> on the frontend</li>
+                                <li data-i18n="job3.2">Refactored services to align with current principles and design patterns</li>
+                                <li data-i18n="job3.3">Defined project scope, estimated timelines and planned tasks</li>
+                                <li data-i18n="job3.4">Analyzed, fixed and tested software bugs, with unit and integration testing</li>
+                                <li data-i18n="job3.5">Mentored less experienced colleagues, while growing as a mentee in the company's mentorship program and internal training school</li>
                             </ul>
                             <div class="tags">
-                                <span class="tag">.NET 8</span><span class="tag">Ext JS</span><span class="tag">Unit testing</span>
+                                <span class="tag" data-i18n="w.net-8">.NET 8</span><span class="tag" data-i18n="w.ext-js">Ext JS</span><span class="tag" data-i18n="w.unit-testing">Unit testing</span>
                             </div>
                         </div>
 
                         <div class="job">
                             <div class="job-head">
-                                <h3 class="job-role">Full Stack .NET Developer</h3>
-                                <span class="job-date">Mar 2022 – Nov 2022</span>
+                                <h3 class="job-role" data-i18n="job4.role">Full Stack .NET Developer</h3>
+                                <span class="job-date" data-i18n="job4.date">Mar 2022 – Nov 2022</span>
                             </div>
-                            <div class="job-company">Plain Concepts</div>
+                            <div class="job-company" data-i18n="job4.company">Plain Concepts</div>
                             <ul class="points">
-                                <li>Designed and implemented new features on both frontend and backend</li>
-                                <li>Planned and estimated features with stakeholders, balancing technical feasibility with business needs</li>
-                                <li><b>Interviewed candidates</b> and helped onboard new team members</li>
-                                <li>Delivered <b>internal training sessions</b> on technical topics to encourage knowledge sharing</li>
-                                <li>Provided technical support to customers and ensured quality through unit and integration testing</li>
+                                <li data-i18n="job4.1">Designed and implemented new features on both frontend and backend</li>
+                                <li data-i18n="job4.2">Planned and estimated features with stakeholders, balancing technical feasibility with business needs</li>
+                                <li data-i18n="job4.3"><b>Interviewed candidates</b> and helped onboard new team members</li>
+                                <li data-i18n="job4.4">Delivered <b>internal training sessions</b> on technical topics to encourage knowledge sharing</li>
+                                <li data-i18n="job4.5">Provided technical support to customers and ensured quality through unit and integration testing</li>
                             </ul>
                         </div>
 
                         <div class="job">
                             <div class="job-head">
-                                <h3 class="job-role">Robert Bosch</h3>
-                                <span class="job-date">Jul 2017 – Feb 2022</span>
+                                <h3 class="job-role" data-i18n="job5.role">Robert Bosch</h3>
+                                <span class="job-date" data-i18n="job5.date">Jul 2017 – Feb 2022</span>
                             </div>
-                            <div class="job-company">4 roles · from working student to full stack developer</div>
+                            <div class="job-company" data-i18n="job5.company">4 roles · from working student to full stack developer</div>
 
                             <div class="branch">
                                 <div class="sub">
                                     <div class="job-head">
-                                        <h4 class="job-role">Full Stack .NET Developer</h4>
-                                        <span class="job-date">Dec 2020 – Feb 2022</span>
+                                        <h4 class="job-role" data-i18n="job6.role">Full Stack .NET Developer</h4>
+                                        <span class="job-date" data-i18n="job6.date">Dec 2020 – Feb 2022</span>
                                     </div>
                                     <ul class="points">
-                                        <li>Rewrote critical modules to reduce technical debt, introducing a <b>clean architecture</b> and applying OOP and SOLID principles</li>
-                                        <li>Restructured code for unit testability, <b>increasing test coverage</b> and simplifying maintenance</li>
-                                        <li>Mentored new colleagues on clean code, testing strategies and architecture</li>
+                                        <li data-i18n="job6.1">Rewrote critical modules to reduce technical debt, introducing a <b>clean architecture</b> and applying OOP and SOLID principles</li>
+                                        <li data-i18n="job6.2">Restructured code for unit testability, <b>increasing test coverage</b> and simplifying maintenance</li>
+                                        <li data-i18n="job6.3">Mentored new colleagues on clean code, testing strategies and architecture</li>
                                     </ul>
                                 </div>
 
                                 <div class="sub">
                                     <div class="job-head">
-                                        <h4 class="job-role">.NET Desktop Developer</h4>
-                                        <span class="job-date">Jan 2019 – Dec 2020</span>
+                                        <h4 class="job-role" data-i18n="job7.role">.NET Desktop Developer</h4>
+                                        <span class="job-date" data-i18n="job7.date">Jan 2019 – Dec 2020</span>
                                     </div>
                                     <ul class="points">
-                                        <li>Developed backend logic and UI features for desktop applications</li>
-                                        <li>Ran code reviews, wrote unit tests (xUnit) and performed integration testing</li>
-                                        <li>Fixed bugs to keep the application stable and managed versioned manual releases</li>
+                                        <li data-i18n="job7.1">Developed backend logic and UI features for desktop applications</li>
+                                        <li data-i18n="job7.2">Ran code reviews, wrote unit tests (xUnit) and performed integration testing</li>
+                                        <li data-i18n="job7.3">Fixed bugs to keep the application stable and managed versioned manual releases</li>
                                     </ul>
                                 </div>
 
                                 <div class="sub">
                                     <div class="job-head">
-                                        <h4 class="job-role">Automotive Software Engineer</h4>
-                                        <span class="job-date">Jul 2018 – Jan 2019</span>
+                                        <h4 class="job-role" data-i18n="job8.role">Automotive Software Engineer</h4>
+                                        <span class="job-date" data-i18n="job8.date">Jul 2018 – Jan 2019</span>
                                     </div>
                                     <ul class="points">
-                                        <li>Tested diagnostic functionality over CAN with CANoe and configured AUTOSAR modules with BCT</li>
-                                        <li>Automated workflows with Python scripts and fixed QAC warnings in C/C++ code</li>
+                                        <li data-i18n="job8.1">Tested diagnostic functionality over CAN with CANoe and configured AUTOSAR modules with BCT</li>
+                                        <li data-i18n="job8.2">Automated workflows with Python scripts and fixed QAC warnings in C/C++ code</li>
                                     </ul>
                                 </div>
 
                                 <div class="sub">
                                     <div class="job-head">
-                                        <h4 class="job-role">Working Student</h4>
-                                        <span class="job-date">Jul 2017 – Jul 2018</span>
+                                        <h4 class="job-role" data-i18n="job9.role">Working Student</h4>
+                                        <span class="job-date" data-i18n="job9.date">Jul 2017 – Jul 2018</span>
                                     </div>
                                     <ul class="points">
-                                        <li>Built a Qt (C++) GUI for a Raspberry Pi, optimized for limited hardware, and integrated it with a <b>machine learning</b> algorithm</li>
+                                        <li data-i18n="job9.1">Built a Qt (C++) GUI for a Raspberry Pi, optimized for limited hardware, and integrated it with a <b>machine learning</b> algorithm</li>
                                     </ul>
                                 </div>
                             </div>
                             <div class="tags">
-                                <span class="tag">C#</span><span class="tag">WPF</span><span class="tag">xUnit</span><span class="tag">C/C++</span><span class="tag">Qt</span><span class="tag">Python</span><span class="tag">AUTOSAR</span>
+                                <span class="tag" data-i18n="w.c">C#</span><span class="tag" data-i18n="w.wpf">WPF</span><span class="tag" data-i18n="w.xunit">xUnit</span><span class="tag" data-i18n="w.c-c">C/C++</span><span class="tag" data-i18n="w.qt">Qt</span><span class="tag" data-i18n="w.python">Python</span><span class="tag" data-i18n="w.autosar">AUTOSAR</span>
                             </div>
                         </div>
                     </div>
@@ -1055,192 +1084,192 @@
 
             <aside>
                 <section>
-                    <h2 class="sec-title"><span class="idx">02</span> Skills</h2>
+                    <h2 class="sec-title" data-i18n="sec2"><span class="idx">02</span> Skills</h2>
 
                     <div class="skill-group ai">
-                        <h4>✦ AI-powered engineering</h4>
+                        <h4 data-i18n="sg.ai-powered-engineering">✦ AI-powered engineering</h4>
                         <div class="chips">
-                            <span class="chip-s">GitHub Copilot</span>
-                            <span class="chip-s">AI-Assisted Development</span>
-                            <span class="chip-s">AI Agents</span>
-                            <span class="chip-s">LLM Integration</span>
-                            <span class="chip-s">Prompt Engineering</span>
-                            <span class="chip-s">Python</span>
+                            <span class="chip-s" data-i18n="w.github-copilot">GitHub Copilot</span>
+                            <span class="chip-s" data-i18n="w.ai-assisted-development">AI-Assisted Development</span>
+                            <span class="chip-s" data-i18n="w.ai-agents">AI Agents</span>
+                            <span class="chip-s" data-i18n="w.llm-integration">LLM Integration</span>
+                            <span class="chip-s" data-i18n="w.prompt-engineering">Prompt Engineering</span>
+                            <span class="chip-s" data-i18n="w.python">Python</span>
                         </div>
                     </div>
 
                     <div class="skill-group">
-                        <h4>Backend &amp; Cloud</h4>
+                        <h4 data-i18n="sg.backend-cloud">Backend &amp; Cloud</h4>
                         <div class="chips">
-                            <span class="chip-s">C#</span>
-                            <span class="chip-s">.NET</span>
-                            <span class="chip-s">EF Core</span>
-                            <span class="chip-s">REST APIs</span>
-                            <span class="chip-s">Microservices</span>
-                            <span class="chip-s">Azure</span>
-                            <span class="chip-s">Serverless</span>
-                            <span class="chip-s">SQL Server</span>
-                            <span class="chip-s">NoSQL</span>
+                            <span class="chip-s" data-i18n="w.c">C#</span>
+                            <span class="chip-s" data-i18n="w.net">.NET</span>
+                            <span class="chip-s" data-i18n="w.ef-core">EF Core</span>
+                            <span class="chip-s" data-i18n="w.rest-apis">REST APIs</span>
+                            <span class="chip-s" data-i18n="w.microservices">Microservices</span>
+                            <span class="chip-s" data-i18n="w.azure">Azure</span>
+                            <span class="chip-s" data-i18n="w.serverless">Serverless</span>
+                            <span class="chip-s" data-i18n="w.sql-server">SQL Server</span>
+                            <span class="chip-s" data-i18n="w.nosql">NoSQL</span>
                         </div>
                     </div>
 
                     <div class="skill-group">
-                        <h4>Frontend &amp; Mobile</h4>
+                        <h4 data-i18n="sg.frontend-mobile">Frontend &amp; Mobile</h4>
                         <div class="chips">
-                            <span class="chip-s">React</span>
-                            <span class="chip-s">React Native</span>
-                            <span class="chip-s">Redux</span>
-                            <span class="chip-s">TypeScript</span>
-                            <span class="chip-s">JavaScript</span>
-                            <span class="chip-s">Ext JS</span>
-                            <span class="chip-s">HTML</span>
-                            <span class="chip-s">CSS</span>
+                            <span class="chip-s" data-i18n="w.react">React</span>
+                            <span class="chip-s" data-i18n="w.react-native">React Native</span>
+                            <span class="chip-s" data-i18n="w.redux">Redux</span>
+                            <span class="chip-s" data-i18n="w.typescript">TypeScript</span>
+                            <span class="chip-s" data-i18n="w.javascript">JavaScript</span>
+                            <span class="chip-s" data-i18n="w.ext-js">Ext JS</span>
+                            <span class="chip-s" data-i18n="w.html">HTML</span>
+                            <span class="chip-s" data-i18n="w.css">CSS</span>
                         </div>
                     </div>
 
                     <div class="skill-group">
-                        <h4>Engineering practices</h4>
+                        <h4 data-i18n="sg.engineering-practices">Engineering practices</h4>
                         <div class="chips">
-                            <span class="chip-s">CI/CD</span>
-                            <span class="chip-s">Unit &amp; Integration Testing</span>
-                            <span class="chip-s">Clean Architecture</span>
-                            <span class="chip-s">SOLID</span>
-                            <span class="chip-s">Refactoring</span>
-                            <span class="chip-s">Code Reviews</span>
-                            <span class="chip-s">Scrum</span>
-                            <span class="chip-s">Mentoring</span>
+                            <span class="chip-s" data-i18n="w.ci-cd">CI/CD</span>
+                            <span class="chip-s" data-i18n="w.unit-integration-testing">Unit &amp; Integration Testing</span>
+                            <span class="chip-s" data-i18n="w.clean-architecture">Clean Architecture</span>
+                            <span class="chip-s" data-i18n="w.solid">SOLID</span>
+                            <span class="chip-s" data-i18n="w.refactoring">Refactoring</span>
+                            <span class="chip-s" data-i18n="w.code-reviews">Code Reviews</span>
+                            <span class="chip-s" data-i18n="w.scrum">Scrum</span>
+                            <span class="chip-s" data-i18n="w.mentoring">Mentoring</span>
                         </div>
                     </div>
                 </section>
 
                 <section>
-                    <h2 class="sec-title"><span class="idx">03</span> Education</h2>
+                    <h2 class="sec-title" data-i18n="sec3"><span class="idx">03</span> Education</h2>
 
                     <div class="edu">
-                        <div class="edu-period">in progress → 2027</div>
-                        <h3 class="edu-title">AI &amp; Machine Learning (Python based)</h3>
-                        <div class="edu-place">Link Academy</div>
+                        <div class="edu-period" data-i18n="edu1.period">in progress → 2027</div>
+                        <h3 class="edu-title" data-i18n="edu1.title">AI &amp; Machine Learning (Python based)</h3>
+                        <div class="edu-place" data-i18n="edu1.place">Link Academy</div>
                         <div class="progress" aria-hidden="true"><span></span></div>
                     </div>
 
                     <div class="edu">
-                        <div class="edu-period">2018 – 2021</div>
-                        <h3 class="edu-title">Master's degree, Information Technology in Economics</h3>
-                        <div class="edu-topics">BPMN · Project Management · Economics · Research &amp; academic writing</div>
+                        <div class="edu-period" data-i18n="edu2.period">2018 – 2021</div>
+                        <h3 class="edu-title" data-i18n="edu2.title">Master's degree, Information Technology in Economics</h3>
+                        <div class="edu-topics" data-i18n="edu2.topics">BPMN · Project Management · Economics · Research &amp; academic writing</div>
                     </div>
 
                     <div class="edu">
-                        <div class="edu-period">2014 – 2018</div>
-                        <h3 class="edu-title">Bachelor's degree, System Engineering and Applied Informatics</h3>
-                        <div class="edu-topics">OOP · Data Structures &amp; Algorithms · Logic Design · Control Engineering · Matlab</div>
+                        <div class="edu-period" data-i18n="edu3.period">2014 – 2018</div>
+                        <h3 class="edu-title" data-i18n="edu3.title">Bachelor's degree, System Engineering and Applied Informatics</h3>
+                        <div class="edu-topics" data-i18n="edu3.topics">OOP · Data Structures &amp; Algorithms · Logic Design · Control Engineering · Matlab</div>
                     </div>
                 </section>
 
                 <section>
-                    <h2 class="sec-title"><span class="idx">04</span> Beyond code</h2>
+                    <h2 class="sec-title" data-i18n="sec4"><span class="idx">04</span> Beyond code</h2>
 
                     <div class="side-card">
                         <div class="job-head">
-                            <h3 class="job-role">Insurance Sales Agent</h3>
-                            <span class="job-date">2019 – 2021</span>
+                            <h3 class="job-role" data-i18n="job10.role">Insurance Sales Agent</h3>
+                            <span class="job-date" data-i18n="job10.date">2019 – 2021</span>
                         </div>
-                        <div class="job-company">Generali Romania · part-time</div>
+                        <div class="job-company" data-i18n="job10.company">Generali Romania · part-time</div>
                         <ul class="points">
-                            <li>Sold life and general insurance to individual clients, alongside my full-time engineering role</li>
-                            <li>Identified client needs and recommended suitable solutions</li>
-                            <li>Built long-term relationships that drove retention and referrals, and consistently met sales targets</li>
+                            <li data-i18n="job10.1">Sold life and general insurance to individual clients, alongside my full-time engineering role</li>
+                            <li data-i18n="job10.2">Identified client needs and recommended suitable solutions</li>
+                            <li data-i18n="job10.3">Built long-term relationships that drove retention and referrals, and consistently met sales targets</li>
                         </ul>
                     </div>
                 </section>
 
                 <section>
-                    <h2 class="sec-title"><span class="idx">05</span> Languages</h2>
+                    <h2 class="sec-title" data-i18n="sec5"><span class="idx">05</span> Languages</h2>
                     <div class="plain-list">
-                        <span class="chip-s">Romanian</span>
-                        <span class="chip-s">English</span>
+                        <span class="chip-s" data-i18n="w.romanian">Romanian</span>
+                        <span class="chip-s" data-i18n="w.english">English</span>
                     </div>
                 </section>
 
                 <section>
-                    <h2 class="sec-title"><span class="idx">06</span> Interests</h2>
+                    <h2 class="sec-title" data-i18n="sec6"><span class="idx">06</span> Interests</h2>
                     <div class="plain-list">
-                        <span class="chip-s">Tennis</span>
-                        <span class="chip-s">Sports</span>
-                        <span class="chip-s">Economics</span>
-                        <span class="chip-s">Business</span>
-                        <span class="chip-s">IoT</span>
-                        <span class="chip-s">Home Automation</span>
-                        <span class="chip-s">Wellbeing</span>
-                        <span class="chip-s">Self-help</span>
+                        <span class="chip-s" data-i18n="w.tennis">Tennis</span>
+                        <span class="chip-s" data-i18n="w.sports">Sports</span>
+                        <span class="chip-s" data-i18n="w.economics">Economics</span>
+                        <span class="chip-s" data-i18n="w.business">Business</span>
+                        <span class="chip-s" data-i18n="w.iot">IoT</span>
+                        <span class="chip-s" data-i18n="w.home-automation">Home Automation</span>
+                        <span class="chip-s" data-i18n="w.wellbeing">Wellbeing</span>
+                        <span class="chip-s" data-i18n="w.self-help">Self-help</span>
                     </div>
                 </section>
             </aside>
         </div>
 
         <section class="projects-wrap">
-            <h2 class="sec-title"><span class="idx">07</span> Selected projects</h2>
+            <h2 class="sec-title" data-i18n="sec7"><span class="idx">07</span> Selected projects</h2>
 
             <div class="projects">
                 <article class="project featured">
-                    <div class="project-meta">Banca Transilvania · full backend</div>
-                    <h3>BT Pay integration backend</h3>
-                    <p>Intermediary layer between the BT Pay mobile app and the rest of the bank's integrations. It receives requests from the app, orchestrates and routes them to the right internal and third-party systems, and exposes reliable, secure APIs consumed by BT Pay.</p>
-                    <div class="tags"><span class="tag">Backend</span><span class="tag">Integrations</span><span class="tag">Banking</span><span class="tag ai">AI-assisted dev</span></div>
+                    <div class="project-meta" data-i18n="proj1.meta">Banca Transilvania · full backend</div>
+                    <h3 data-i18n="proj1.title">BT Pay integration backend</h3>
+                    <p data-i18n="proj1.desc">Intermediary layer between the BT Pay mobile app and the rest of the bank's integrations. It receives requests from the app, orchestrates and routes them to the right internal and third-party systems, and exposes reliable, secure APIs consumed by BT Pay.</p>
+                    <div class="tags"><span class="tag" data-i18n="w.backend">Backend</span><span class="tag" data-i18n="w.integrations">Integrations</span><span class="tag" data-i18n="w.banking">Banking</span><span class="tag ai" data-i18n="w.ai-assisted-dev">AI-assisted dev</span></div>
                 </article>
 
                 <article class="project featured">
-                    <div class="project-meta">Dash Out · co-founder</div>
-                    <h3>Dash Out</h3>
-                    <p>Mobile app that helps people discover new experiences and connect with others. A .NET backend on Azure for scalability, security and reliability, plus an AI agent that processes photos and automatically publishes content on social media.</p>
-                    <div class="tags"><span class="tag">.NET</span><span class="tag">Azure</span><span class="tag">Mobile</span><span class="tag ai">AI agent</span></div>
+                    <div class="project-meta" data-i18n="proj2.meta">Dash Out · technical lead</div>
+                    <h3 data-i18n="proj2.title">Dash Out</h3>
+                    <p data-i18n="proj2.desc">Mobile app that helps people discover new experiences and connect with others. A .NET backend on Azure for scalability, security and reliability, plus an AI agent that processes photos and automatically publishes content on social media.</p>
+                    <div class="tags"><span class="tag" data-i18n="w.net">.NET</span><span class="tag" data-i18n="w.azure">Azure</span><span class="tag" data-i18n="w.mobile">Mobile</span><span class="tag ai" data-i18n="w.ai-agent">AI agent</span></div>
                 </article>
 
                 <article class="project">
-                    <div class="project-meta">Fintech · microservices</div>
-                    <h3>Back-office order management for investments</h3>
-                    <p>Microservices system managing investment orders from banks, with extensive configuration and business rules. Orders are sent over AMQP (RabbitMQ) to brokers to buy and sell financial instruments for bank clients.</p>
-                    <div class="tags"><span class="tag">Microservices</span><span class="tag">RabbitMQ</span><span class="tag">AMQP</span></div>
+                    <div class="project-meta" data-i18n="proj3.meta">Fintech · microservices</div>
+                    <h3 data-i18n="proj3.title">Back-office order management for investments</h3>
+                    <p data-i18n="proj3.desc">Microservices system managing investment orders from banks, with extensive configuration and business rules. Orders are sent over AMQP (RabbitMQ) to brokers to buy and sell financial instruments for bank clients.</p>
+                    <div class="tags"><span class="tag" data-i18n="w.microservices">Microservices</span><span class="tag" data-i18n="w.rabbitmq">RabbitMQ</span><span class="tag" data-i18n="w.amqp">AMQP</span></div>
                 </article>
 
                 <article class="project">
-                    <div class="project-meta">Automotive · document management</div>
-                    <h3>Document management system</h3>
-                    <p>Migrated from .NET Framework to .NET Core for performance and scalability. SharePoint integration for secure storage, retrieval and metadata tagging, with collaboration tools, a structured review process and version control.</p>
-                    <div class="tags"><span class="tag">.NET Core</span><span class="tag">SharePoint</span><span class="tag">Migration</span></div>
+                    <div class="project-meta" data-i18n="proj4.meta">Automotive · document management</div>
+                    <h3 data-i18n="proj4.title">Document management system</h3>
+                    <p data-i18n="proj4.desc">Migrated from .NET Framework to .NET Core for performance and scalability. SharePoint integration for secure storage, retrieval and metadata tagging, with collaboration tools, a structured review process and version control.</p>
+                    <div class="tags"><span class="tag" data-i18n="w.net-core">.NET Core</span><span class="tag" data-i18n="w.sharepoint">SharePoint</span><span class="tag" data-i18n="w.migration">Migration</span></div>
                 </article>
 
                 <article class="project">
-                    <div class="project-meta">Web application</div>
-                    <h3>HR time &amp; leave management</h3>
-                    <p>Employees submit time entries and days-off requests that managers approve or decline, with monthly reports of hours worked and leave balances.</p>
-                    <div class="tags"><span class="tag">Web app</span><span class="tag">Reporting</span></div>
+                    <div class="project-meta" data-i18n="proj5.meta">Web application</div>
+                    <h3 data-i18n="proj5.title">HR time &amp; leave management</h3>
+                    <p data-i18n="proj5.desc">Employees submit time entries and days-off requests that managers approve or decline, with monthly reports of hours worked and leave balances.</p>
+                    <div class="tags"><span class="tag" data-i18n="w.web-app">Web app</span><span class="tag" data-i18n="w.reporting">Reporting</span></div>
                 </article>
 
                 <article class="project">
-                    <div class="project-meta">Banking · integration</div>
-                    <h3>Banking service connector</h3>
-                    <p>.NET connector that calls a third-party banking service to retrieve account information and passes it to the client application for further processing.</p>
-                    <div class="tags"><span class="tag">.NET</span><span class="tag">Third-party APIs</span></div>
+                    <div class="project-meta" data-i18n="proj6.meta">Banking · integration</div>
+                    <h3 data-i18n="proj6.title">Banking service connector</h3>
+                    <p data-i18n="proj6.desc">.NET connector that calls a third-party banking service to retrieve account information and passes it to the client application for further processing.</p>
+                    <div class="tags"><span class="tag" data-i18n="w.net">.NET</span><span class="tag" data-i18n="w.third-party-apis">Third-party APIs</span></div>
                 </article>
 
                 <article class="project">
-                    <div class="project-meta">Automotive · developer tooling</div>
-                    <h3>XML configurator &amp; C++ code generator</h3>
-                    <p>WPF desktop tool for configuring XML files through a GUI editor, generating the C++ code used by automotive developers.</p>
-                    <div class="tags"><span class="tag">.NET</span><span class="tag">WPF</span><span class="tag">Code generation</span></div>
+                    <div class="project-meta" data-i18n="proj7.meta">Automotive · developer tooling</div>
+                    <h3 data-i18n="proj7.title">XML configurator &amp; C++ code generator</h3>
+                    <p data-i18n="proj7.desc">WPF desktop tool for configuring XML files through a GUI editor, generating the C++ code used by automotive developers.</p>
+                    <div class="tags"><span class="tag" data-i18n="w.net">.NET</span><span class="tag" data-i18n="w.wpf">WPF</span><span class="tag" data-i18n="w.code-generation">Code generation</span></div>
                 </article>
 
                 <article class="project">
-                    <div class="project-meta">Personal</div>
-                    <h3>Personal portfolio</h3>
-                    <p>React website deployed on Azure, with a .NET backend for managing references left by co-workers.</p>
-                    <div class="tags"><span class="tag">React</span><span class="tag">.NET</span><span class="tag">Azure</span></div>
+                    <div class="project-meta" data-i18n="proj8.meta">Personal</div>
+                    <h3 data-i18n="proj8.title">Personal portfolio</h3>
+                    <p data-i18n="proj8.desc">React website deployed on Azure, with a .NET backend for managing references left by co-workers.</p>
+                    <div class="tags"><span class="tag" data-i18n="w.react">React</span><span class="tag" data-i18n="w.net">.NET</span><span class="tag" data-i18n="w.azure">Azure</span></div>
                 </article>
             </div>
         </section>
 
         <footer class="footer">
-            <a href="https://alexandrumaries.com" target="_blank" rel="noopener">alexandrumaries.com</a>
+            <span>Alex Mărieș · Cluj-Napoca</span>
             <span>// designed &amp; coded in HTML + CSS, with a little help from AI</span>
         </footer>
     </article>
@@ -1248,15 +1277,192 @@
     <script>
         (function () {
             var CV_WIDTH = 1000;
-            var KEY = 'cv-theme';
+            var THEME_KEY = 'cv-theme';
+            var LANG_KEY = 'cv-lang';
             var root = document.documentElement;
             var cv = document.querySelector('.cv');
             var theme = root.getAttribute('data-theme') || 'light';
+            var lang = root.getAttribute('lang') === 'ro' ? 'ro' : 'en';
+
+            // English lives in the markup; only the Romanian strings are listed here.
+            // Anything without an entry (names, tech terms, dates) falls back to the English text.
+            var RO = {
+            "summary": "Construiesc <b>sisteme backend scalabile</b> și produse full-stack cu C#, .NET și Azure. De peste <b>9 ani</b> am evoluat de la software embedded și desktop la banking și fintech, unde sunt responsabil de fluxuri de business critice, integrez sisteme interne și ale unor terți și asigur suportul în producție prin on-call. Lucrez <b>AI-first</b>: GitHub Copilot face parte din fluxul meu zilnic de lucru, iar construiesc agenți AI care automatizează muncă reală de business. Îmi place să îmi mentorez colegii și să ajut echipele să livreze software mai bun, mai repede.",
+            "now.label": "// în prezent",
+            "now1.sub": "backend integrare BT Pay · on-call · mentorat",
+            "now2.sub": "co-fondator · arhitectură · mobil + AI",
+            "stat1": "ani de experiență în software, de la embedded la cloud",
+            "stat2": "sisteme bancare, de plăți și de investiții",
+            "stat3": "fluxuri de lucru cu Copilot și agenți AI în proiecte reale",
+            "stat4": "Dash Out: arhitectură și livrare, cap-coadă",
+            "sec1": "<span class=\"idx\">01</span> Experiență",
+            "sec2": "<span class=\"idx\">02</span> Competențe",
+            "sec3": "<span class=\"idx\">03</span> Educație",
+            "sec4": "<span class=\"idx\">04</span> În afara codului",
+            "sec5": "<span class=\"idx\">05</span> Limbi",
+            "sec6": "<span class=\"idx\">06</span> Interese",
+            "sec7": "<span class=\"idx\">07</span> Proiecte selectate",
+            "job1.date": "Oct 2025 – Prezent",
+            "job1.company": "Banca Transilvania <span class=\"pill-now\">acum</span>",
+            "job1.1": "Dezvolt servicii backend pentru <b>stratul de integrare al BT Pay</b>, între aplicație, sistemele interne ale băncii și integrările cu terți",
+            "job1.2": "<b>Owner pe fluxuri de business esențiale</b>, responsabil de fiabilitatea și îmbunătățirea lor continuă",
+            "job1.3": "Investighez și rezolv <b>probleme din producție</b> și particip la rotațiile de <b>on-call</b> pentru un răspuns rapid la incidente",
+            "job1.4": "Mentorez și sprijin colegii juniori în dezvoltarea lor tehnică și profesională",
+            "job1.5": "Dezvolt cu <b>GitHub Copilot</b> la implementare, refactorizare, teste unitare și code review și susțin adoptarea <b>uneltelor și practicilor AI</b> în procesul de dezvoltare al echipei",
+            "job2.date": "Apr 2024 – Prezent",
+            "job2.company": "Dash Out <span class=\"pill-now\">acum</span>",
+            "job2.1": "<b>Technical lead al întregului proiect</b>, de la idee la lansare, definind viziunea tehnică și roadmap-ul în linie cu obiectivele de business",
+            "job2.2": "Răspund de <b>arhitectura soluției</b> și am proiectat un <b>backend .NET scalabil pe Azure</b>, plus interfețele de mobil și web",
+            "job2.3": "Am construit un <b>agent AI</b> care procesează fotografii și <b>publică automat conținut pe social media</b>, automatizând fluxul de marketing",
+            "job2.4": "Folosesc <b>dezvoltarea asistată de AI</b> cu GitHub Copilot pe tot ciclul de viață, de la funcționalități și refactorizare la teste și documentație",
+            "job2.5": "Am format și condus o echipă multidisciplinară folosind Scrum, cu livrarea la timp a funcționalităților",
+            "job2.6": "Am configurat <b>pipeline-uri CI/CD</b> cu teste automate obligatorii la fiecare pull request, susținute de teste unitare, de integrare și end-to-end",
+            "job3.1": "Am dezvoltat funcționalități full-stack cu <b>.NET 8</b> pe backend și <b>Ext JS</b> pe frontend",
+            "job3.2": "Am refactorizat servicii pentru a respecta principiile și pattern-urile de design actuale",
+            "job3.3": "Am definit scopul proiectelor, am estimat termene și am planificat sarcinile",
+            "job3.4": "Am analizat, remediat și testat bug-uri, cu teste unitare și de integrare",
+            "job3.5": "Am mentorat colegi cu mai puțină experiență, fiind totodată mentee în programul de mentorat și în școala internă de training a companiei",
+            "job4.1": "Am proiectat și implementat funcționalități noi, atât pe frontend, cât și pe backend",
+            "job4.2": "Am planificat și estimat funcționalități împreună cu stakeholderii, echilibrând fezabilitatea tehnică cu nevoile de business",
+            "job4.3": "Am <b>intervievat candidați</b> și am ajutat la integrarea noilor membri ai echipei",
+            "job4.4": "Am susținut <b>sesiuni interne de training</b> pe teme tehnice, pentru a încuraja schimbul de cunoștințe",
+            "job4.5": "Am oferit suport tehnic clienților și am asigurat calitatea prin teste unitare și de integrare",
+            "job5.date": "Iul 2017 – Feb 2022",
+            "job5.company": "4 roluri · de la student angajat la dezvoltator full stack",
+            "job6.1": "Am rescris module critice pentru a reduce datoria tehnică, introducând o <b>arhitectură curată</b> și aplicând principiile OOP și SOLID",
+            "job6.2": "Am restructurat codul pentru testabilitate unitară, <b>crescând acoperirea cu teste</b> și simplificând mentenanța",
+            "job6.3": "Am mentorat colegi noi pe clean code, strategii de testare și arhitectură",
+            "job7.date": "Ian 2019 – Dec 2020",
+            "job7.1": "Am dezvoltat logică backend și funcționalități de interfață pentru aplicații desktop",
+            "job7.2": "Am făcut code review, am scris teste unitare (xUnit) și am efectuat teste de integrare",
+            "job7.3": "Am remediat bug-uri pentru stabilitatea aplicației și am gestionat release-uri manuale versionate",
+            "job8.date": "Iul 2018 – Ian 2019",
+            "job8.1": "Am testat funcționalități de diagnostic peste CAN cu CANoe și am configurat module AUTOSAR cu BCT",
+            "job8.2": "Am automatizat fluxuri de lucru cu scripturi Python și am remediat warning-uri QAC în cod C/C++",
+            "job9.role": "Student angajat",
+            "job9.date": "Iul 2017 – Iul 2018",
+            "job9.1": "Am construit o interfață Qt (C++) pentru Raspberry Pi, optimizată pentru hardware limitat, integrată cu un algoritm de <b>machine learning</b>",
+            "sg.ai-powered-engineering": "✦ Inginerie cu AI",
+            "sg.frontend-mobile": "Frontend &amp; Mobil",
+            "sg.engineering-practices": "Practici de inginerie",
+            "edu1.period": "în desfășurare → 2027",
+            "edu1.title": "AI &amp; Machine Learning (bazat pe Python)",
+            "edu2.title": "Master, Tehnologia informației în economie",
+            "edu2.topics": "BPMN · Managementul proiectelor · Economie · Cercetare și redactare de articole",
+            "edu3.title": "Licență, Ingineria sistemelor și informatică aplicată",
+            "edu3.topics": "OOP · Structuri de date și algoritmi · Proiectare logică · Ingineria reglării automate · Matlab",
+            "job10.role": "Agent de vânzări asigurări",
+            "job10.company": "Generali România · part-time",
+            "job10.1": "Am vândut asigurări de viață și generale persoanelor fizice, în paralel cu rolul meu de inginer cu normă întreagă",
+            "job10.2": "Am identificat nevoile clienților și am recomandat soluții potrivite",
+            "job10.3": "Am construit relații pe termen lung care au generat retenție și recomandări și mi-am atins constant țintele de vânzări",
+            "proj1.meta": "Banca Transilvania · backend complet",
+            "proj1.desc": "Strat intermediar între aplicația mobilă BT Pay și restul integrărilor băncii. Primește cererile din aplicație, le orchestrează și le rutează către sistemele interne și ale terților potrivite și expune API-uri fiabile și sigure, consumate de BT Pay.",
+            "proj2.meta": "Dash Out · technical lead",
+            "proj2.desc": "Aplicație mobilă care îi ajută pe oameni să descopere experiențe noi și să se conecteze cu alții. Backend .NET pe Azure pentru scalabilitate, securitate și fiabilitate, plus un agent AI care procesează fotografii și publică automat conținut pe social media.",
+            "proj3.meta": "Fintech · microservicii",
+            "proj3.title": "Back-office pentru managementul ordinelor de investiții",
+            "proj3.desc": "Sistem pe microservicii care gestionează ordinele de investiții ale băncilor, cu configurări extinse și reguli de business. Ordinele sunt trimise prin AMQP (RabbitMQ) către brokeri pentru a cumpăra și a vinde instrumente financiare pentru clienții băncii.",
+            "proj4.meta": "Automotive · managementul documentelor",
+            "proj4.title": "Sistem de management al documentelor",
+            "proj4.desc": "Migrat de la .NET Framework la .NET Core pentru performanță și scalabilitate. Integrare SharePoint pentru stocarea, regăsirea și etichetarea sigură a documentelor, cu instrumente de colaborare, proces structurat de review și versionare.",
+            "proj5.meta": "Aplicație web",
+            "proj5.title": "Managementul pontajului și al concediilor (HR)",
+            "proj5.desc": "Angajații trimit pontaje și cereri de concediu pe care managerii le aprobă sau le resping, cu rapoarte lunare de ore lucrate și solduri de concediu.",
+            "proj6.meta": "Banking · integrare",
+            "proj6.title": "Conector pentru servicii bancare",
+            "proj6.desc": "Conector .NET care apelează un serviciu bancar terț pentru a prelua informații despre conturi și le transmite aplicației client pentru procesare ulterioară.",
+            "proj7.meta": "Automotive · unelte pentru dezvoltatori",
+            "proj7.title": "Configurator XML și generator de cod C++",
+            "proj7.desc": "Unealtă desktop WPF pentru configurarea fișierelor XML printr-un editor grafic, care generează codul C++ folosit de dezvoltatorii din automotive.",
+            "proj8.meta": "Personal",
+            "proj8.title": "Portofoliu personal",
+            "proj8.desc": "Site React publicat pe Azure, cu backend .NET pentru gestionarea recomandărilor lăsate de colegi.",
+            "w.integrations": "Integrări",
+            "w.mobile": "Mobil",
+            "w.ai-agent": "Agent AI",
+            "w.ai-agents": "Agenți AI",
+            "w.llm-integration": "Integrare LLM",
+            "w.ai-assisted-development": "Dezvoltare asistată de AI",
+            "w.ai-assisted-dev": "Dezvoltare asistată de AI",
+            "w.unit-testing": "Teste unitare",
+            "w.unit-integration-testing": "Teste unitare și de integrare",
+            "w.microservices": "Microservicii",
+            "w.clean-architecture": "Arhitectură curată",
+            "w.refactoring": "Refactorizare",
+            "w.code-reviews": "Code review",
+            "w.mentoring": "Mentorat",
+            "w.romanian": "Română",
+            "w.english": "Engleză",
+            "w.tennis": "Tenis",
+            "w.sports": "Sport",
+            "w.economics": "Economie",
+            "w.home-automation": "Automatizări pentru casă",
+            "w.self-help": "Dezvoltare personală",
+            "w.migration": "Migrare",
+            "w.web-app": "Aplicație web",
+            "w.reporting": "Raportare",
+            "w.third-party-apis": "API-uri terțe",
+            "w.code-generation": "Generare de cod",
+            "ui.theme": "Temă",
+            "ui.save": "Salvează PDF",
+            "ui.actions": "Acțiuni pagină",
+            "ui.lang": "Schimbă limba",
+            "ui.theme.aria": "Comută tema întunecată",
+            "ui.photo": "Portretul lui Alex Mărieș",
+            "ui.location": "Cluj-Napoca, România",
+            "ui.now": "În prezent",
+            "ui.stats": "Repere",
+            "meta.desc": "Alex Mărieș, Senior Software Engineer: .NET, Azure, banking și fintech, dezvoltare asistată de AI."
+};
+
+            var textNodes = [].slice.call(document.querySelectorAll('[data-i18n]'));
+            textNodes.forEach(function (el) { el._en = el.innerHTML; });
+
+            var attrNodes = [];
+            [].slice.call(document.querySelectorAll('[data-i18n-attrs]')).forEach(function (el) {
+                el.getAttribute('data-i18n-attrs').split(';').forEach(function (pair) {
+                    var parts = pair.split(':');
+                    attrNodes.push({ el: el, attr: parts[0], key: parts[1], en: el.getAttribute(parts[0]) });
+                });
+            });
+
+            var metaDesc = document.querySelector('meta[name="description"]');
+            var metaDescEn = metaDesc ? metaDesc.getAttribute('content') : '';
+            var pageTitle = document.title;
+
+            function pick(key, fallback) {
+                return lang === 'ro' && RO[key] != null ? RO[key] : fallback;
+            }
+
+            function applyLanguage() {
+                root.setAttribute('lang', lang);
+                textNodes.forEach(function (el) {
+                    el.innerHTML = pick(el.getAttribute('data-i18n'), el._en);
+                });
+                attrNodes.forEach(function (a) {
+                    a.el.setAttribute(a.attr, pick(a.key, a.en));
+                });
+                if (metaDesc) metaDesc.setAttribute('content', pick('meta.desc', metaDescEn));
+            }
+
+            applyLanguage();
+
+            document.getElementById('langToggle').addEventListener('click', function () {
+                lang = lang === 'en' ? 'ro' : 'en';
+                applyLanguage();
+                try { localStorage.setItem(LANG_KEY, lang); } catch (e) {}
+                try {
+                    var url = new URL(location.href);
+                    url.searchParams.set('lang', lang);
+                    history.replaceState(null, '', url);
+                } catch (e) {}
+            });
 
             document.getElementById('themeToggle').addEventListener('click', function () {
                 theme = theme === 'dark' ? 'light' : 'dark';
                 root.setAttribute('data-theme', theme);
-                try { localStorage.setItem(KEY, theme); } catch (e) {}
+                try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
             });
 
             document.getElementById('printBtn').addEventListener('click', function () {
@@ -1274,6 +1480,8 @@
                 cv.style.maxWidth = CV_WIDTH + 'px';
                 var height = Math.ceil(cv.getBoundingClientRect().height) + 2;
                 pageStyle.textContent = '@page { size: ' + CV_WIDTH + 'px ' + height + 'px; margin: 0; }';
+                // browsers use the page title as the default PDF file name
+                document.title = 'Alex Maries - CV (' + lang.toUpperCase() + ')';
             }
 
             function restoreScreenLayout() {
@@ -1281,6 +1489,7 @@
                 root.setAttribute('data-theme', theme);
                 cv.style.width = '';
                 cv.style.maxWidth = '';
+                document.title = pageTitle;
             }
 
             window.addEventListener('beforeprint', fitPageToContent);
